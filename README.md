@@ -29,3 +29,6 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ### 技术
+```
+vue elementui
+```
