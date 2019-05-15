@@ -1,5 +1,5 @@
 <template>
-  <quill-editor v-model="content" ref="myQuillEditor" :options="editorOption" :style="`height: ${height}`" @change="onEditorChange"></quill-editor>
+  <quill-editor v-model="editorContent" ref="myQuillEditor" :options="editorOption" :style="`height: ${height}`" @change="contentChange"></quill-editor>
 </template>
 
 <script>
@@ -14,16 +14,19 @@ Quill.register('modules/ImageExtend', ImageExtend)
 export default {
   name: 'Editor',
   props: [
-    'value',
+    'content',
     'options',
     'height'
   ],
   components: {
     quillEditor
   },
+  created () {
+    this.editorContent = this.content
+  },
   data () {
     return {
-      content: '',
+      editorContent: '',
       editorOption: {
         modules: {
           ImageExtend: {
@@ -61,8 +64,13 @@ export default {
     }
   },
   methods: {
-    onEditorChange () {
-      this.$emit('input', this.content)
+    contentChange () {
+      this.$emit('update:content', this.editorContent)
+    }
+  },
+  watch: {
+    content (val) {
+      this.editorContent = val
     }
   }
 }

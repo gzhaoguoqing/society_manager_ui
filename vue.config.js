@@ -10,7 +10,7 @@ module.exports = {
     ]
   },
   devServer: {
-    port: 8090,
+    port: 8010,
     proxy: {
       // 请求到 '/device' 下 的请求都会被代理到 target： http://debug.xxx.com 中
       '/api/*': {

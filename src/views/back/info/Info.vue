@@ -1,22 +1,27 @@
 <template>
   <div>
     <div style="margin-bottom: 20px">
-      <el-button type="primary" size="medium" @click="editVisible = true">添加</el-button>
-      <el-button type="danger" size="medium">删除</el-button>
+      <el-button type="primary" size="medium" @click="showCreateDialog">添加</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle">删除</el-button>
     </div>
-    <el-table :data="list" style="width: 100%" border stripe>
+    <el-table :data="list"
+      style="width: 100%"
+      border
+      stripe
+      ref="tableRef"
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="35">
       </el-table-column>
       <el-table-column label="名称" prop="name"></el-table-column>
-      <el-table-column label="负责人" prop="charity"></el-table-column>
+      <el-table-column label="负责人" prop="charity.name"></el-table-column>
       <el-table-column label="介绍" prop="info"></el-table-column>
       <el-table-column label="操作" width="110">
-        <template>
-          <el-button size="small" type="primary">编辑</el-button>
+        <template slot-scope="scope">
+          <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination :current-page="qry.page" :page-size="qry.size" :total="list.length" @page-change="getList"></pagination>
+    <pagination :current-page.sync="qry.page" :page-size.sync="qry.size" :total="total" @page-change="getList"></pagination>
 
     <el-dialog
       :title="isEdit ? '编辑' : '发布'"
@@ -28,8 +33,10 @@
           <el-form-item label="名称">
             <el-input v-model="editItem.name" clearable></el-input>
           </el-form-item>
-          <el-form-item label="负责人">
-            <el-input v-model="editItem.charity" clearable></el-input>
+          <el-form-item label="负责人" style="display: inline-block; width: 50%">
+            <el-select v-model="editItem.charityId" placeholder="请选择" style="width: 100%" clearable>
+              <el-option v-for="item in userList" :key="item.id" :label="`${item.name}:${item.number}`" :value="item.id"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="介绍">
             <el-input v-model="editItem.info" type="textarea" :rows="10" clearable></el-input>
@@ -37,8 +44,8 @@
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer" style="margin-right: 28px">
-        <el-button @click="editVisible = false" size="medium">取 消</el-button>
-        <el-button type="primary" size="medium">确 定</el-button>
+        <el-button @click="editHandleClose" size="medium">取 消</el-button>
+        <el-button type="primary" size="medium" @click="saveInfoHandle">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -46,12 +53,15 @@
 
 <script>
 import Pagination from '../../../components/Pagination'
+import { fetchInfos, saveInfo, updateInfo, deleteInfo } from '../../../api/info.js'
+import { fetchUsers } from '../../../api/user.js'
+import { strJoin } from '../../../util/utils.js'
 import { cloneDeep } from 'lodash'
 
 const emptyItem = {
   id: null,
   name: null,
-  charity: null,
+  charityId: null,
   info: null
 }
 
@@ -63,24 +73,89 @@ export default {
         page: 1,
         size: 10
       },
-      list: [
-        { id: '1', name: '与马者自行车协会', charity: '弓志成', info: '与马者自行车协会成立于2003年1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111' },
-        { id: '2', name: '66轮滑社', charity: '哈哈哈', info: '2221111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111' },
-        { id: '3', name: '青年志愿者协会', charity: '呃呃呃', info: '2222111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111' }
-      ],
+      list: [],
+      total: 0,
+      userList: [],
       editVisible: false,
       isEdit: false,
-      editItem: cloneDeep(emptyItem)
+      editItem: cloneDeep(emptyItem),
+      selections: []
     }
   },
   components: {
     Pagination
   },
+  created () {
+    this.getList()
+    fetchUsers().then(response => {
+      this.userList = response.data.data
+    })
+  },
   methods: {
     getList () {
+      fetchInfos(this.qry).then(response => {
+        this.list = response.data.data
+        this.total = response.data.total
+      })
     },
     editHandleClose () {
       this.editVisible = false
+    },
+    showCreateDialog () {
+      this.editVisible = true
+      this.isEdit = false
+      this.editItem = cloneDeep(emptyItem)
+    },
+    showEditDialog (item) {
+      this.editVisible = true
+      this.isEdit = true
+      this.editItem = cloneDeep(emptyItem)
+      for (let name in this.editItem) {
+        if (item[name]) {
+          this.editItem[name] = item[name]
+        }
+      }
+      this.editItem.charityId = item.charity ? item.charity.id : null
+    },
+    saveInfoHandle () {
+      if (this.isEdit) {
+        updateInfo(cloneDeep(this.editItem)).then(response => {
+          this.$notify({
+            title: '成功',
+            message: '信息编辑成功',
+            type: 'success'
+          })
+          this.getList()
+          this.editVisible = false
+        })
+      } else {
+        saveInfo(cloneDeep(this.editItem)).then(response => {
+          this.$notify({
+            title: '成功',
+            message: '信息添加成功',
+            type: 'success'
+          })
+          this.getList()
+          this.editVisible = false
+        })
+      }
+    },
+    handleSelectionChange (val) {
+      this.selections = val
+    },
+    deleteHandle () {
+      let idArr = []
+      this.selections.forEach(item => {
+        idArr.push(item.id)
+      })
+      deleteInfo(strJoin(idArr, ',')).then(response => {
+        this.$notify({
+          title: '成功',
+          message: '信息删除成功',
+          type: 'success'
+        })
+        this.getList()
+      })
     }
   }
 }
