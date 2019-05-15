@@ -2,9 +2,8 @@
   <div>
     <div style="margin-bottom: 20px">
       <el-button type="primary" size="medium" @click="showCreateDialog">添加</el-button>
-      <el-button type="danger" size="medium" @click="deleteHandle">删除</el-button>
-      <el-button type="danger" size="medium">重置密码</el-button>
-      <el-button type="danger" size="medium">权限管理</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0">删除</el-button>
+      <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0">重置密码</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -84,7 +83,7 @@
 
 <script>
 import Pagination from '../../../components/Pagination'
-import { fetchUsers, saveUser, deleteUser, updateUser } from '../../../api/user.js'
+import { fetchUsers, saveUser, deleteUser, updateUser, resetPwd } from '../../../api/user.js'
 import { fetchInfos } from '../../../api/info.js'
 import { fetchRoles } from '../../../api/role.js'
 import { strJoin } from '../../../util/utils.js'
@@ -205,6 +204,20 @@ export default {
           type: 'success'
         })
         this.getList()
+      })
+    },
+    resetPwdHandle () {
+      let idArr = []
+      this.selections.forEach(item => {
+        idArr.push(item.id)
+      })
+      resetPwd(strJoin(idArr, ',')).then(response => {
+        this.$notify({
+          title: '成功',
+          message: '密码重置成功',
+          type: 'success'
+        })
+        this.$refs.tableRef.clearSelection()
       })
     }
   }

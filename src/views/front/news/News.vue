@@ -1,9 +1,9 @@
 <template>
   <div>
     <el-carousel :interval="4000" type="card" height="260px" style="margin: 0px 100px">
-      <el-carousel-item v-for="item in 4" :key="item" style="vertical-align: middle">
-        <img src="../../../assets/img/news1.jpg" style="height: 90%; width: 100%" @click="imgClick">
-        <div style="height: 10%; text-align: center;">天梯赛</div>
+      <el-carousel-item v-for="item in importantList" :key="item.id" style="vertical-align: middle">
+        <img :src="item.importantImgPath" style="height: 90%; width: 100%" @click="imgClick(item.id)">
+        <div style="height: 10%; text-align: center;">{{item.title}}</div>
       </el-carousel-item>
     </el-carousel>
     <hr style="height:1px; border:none; border-top:1px solid #ccc; margin: 40px 0px;">
@@ -14,15 +14,17 @@
             <router-link :to="`/front/news/detail/${scope.row.id}`">{{scope.row.title}}</router-link>
           </template>
         </el-table-column>
-        <el-table-column label="时间" prop="date" width="150px;"></el-table-column>
+        <el-table-column label="时间" prop="date" width="200px;"></el-table-column>
       </el-table>
     </div>
-    <pagination :current-page="qry.page" :page-size="qry.size" :total="list.length" @page-change="getList"></pagination>
+    <pagination :current-page.sync="qry.page" :page-size.sync="qry.size" :total="total" @page-change="getList"></pagination>
   </div>
 </template>
 
 <script>
 import Pagination from '../../../components/Pagination'
+import { constant } from '../../../const/constant.js'
+import { fetchNewses, fetchImportNewses } from '../../../api/news.js'
 
 export default {
   name: 'News',
@@ -32,23 +34,39 @@ export default {
         page: 1,
         size: 10
       },
-      list: [
-        { id: '1', title: 'biaoti1', date: '2018-03-06' },
-        { id: '2', title: 'biaoti2', date: '2018-03-07' },
-        { id: '3', title: 'biaoti3', date: '2018-03-08' },
-        { id: '4', title: 'biaoti4', date: '2018-03-09' },
-        { id: '5', title: 'biaoti5', date: '2018-03-10' }
-      ]
+      list: [],
+      total: 0,
+      importantList: []
     }
   },
   components: {
     Pagination
   },
+  created () {
+    this.getList()
+    this.getImportList()
+  },
   methods: {
     getList () {
+      fetchNewses(this.qry).then(response => {
+        this.list = response.data.data
+        this.castUrl(this.list)
+        this.total = response.data.total
+      })
     },
-    imgClick () {
-      this.$router.push('/front/news/detail/12')
+    getImportList () {
+      fetchImportNewses({ size: 4 }).then(response => {
+        this.importantList = response.data.data
+        this.castUrl(this.importantList)
+      })
+    },
+    castUrl (itemList) {
+      itemList.forEach(item => {
+        item.importantImgPath = `${constant.baseImgUri}?path=${encodeURIComponent(item.importantImgPath)}`
+      })
+    },
+    imgClick (id) {
+      this.$router.push(`/front/news/detail/${id}`)
     }
   }
 }

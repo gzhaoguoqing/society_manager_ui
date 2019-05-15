@@ -1,4 +1,5 @@
 export const constant = {
   baseUrl: 'http://localhost:8010',
-  baseApiUrl: 'http://localhost:8010/api'
+  baseApiUrl: 'http://localhost:8010/api',
+  baseImgUri: '/api/file/img'
 }

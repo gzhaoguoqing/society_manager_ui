@@ -1,8 +1,8 @@
 <template>
   <div>
-    <el-dropdown v-if="loginedUser != null" placement="bottom-start" @command="dropdownHandle">
+    <el-dropdown v-if="$store.state.loginedUser !== null" placement="bottom-start" @command="dropdownHandle">
       <span class="el-dropdown-link">
-        <i class="iconfont icon-yonghu3 navigationIconPosition"></i>admin
+        <i class="iconfont icon-yonghu3 navigationIconPosition"></i>{{$store.state.loginedUser.name}}
       </span>
       <el-dropdown-menu slot="dropdown" style="margin-left: 10px;">
         <el-dropdown-item command="per_info">个人信息</el-dropdown-item>
@@ -10,7 +10,7 @@
       </el-dropdown-menu>
     </el-dropdown>
     <div v-else style="padding-bottom: 14px">
-      <el-button type="text" @click="loginVisible = true">登陆</el-button>
+      <el-button type="text" @click="loginVisible = true">登录</el-button>
     </div>
     <el-dialog
       title="登陆"
@@ -43,7 +43,7 @@ export default {
   created () {
     getLoginedUser().then(response => {
       if (response.data.code === 1) {
-        this.loginedUser = response.data.data
+        this.$store.commit('logined', response.data.data)
       }
     })
   },
@@ -54,8 +54,7 @@ export default {
       loginUser: {
         number: '',
         password: ''
-      },
-      loginedUser: null
+      }
     }
   },
   methods: {
@@ -66,7 +65,7 @@ export default {
       this.logining = true
       login(this.loginUser).then(response => {
         if (response.data.code === 1) {
-          this.loginedUser = response.data.data
+          this.$store.commit('logined', response.data.data)
           this.loginVisible = false
         } else {
           this.$message.error('用户名或密码错误')
@@ -79,7 +78,7 @@ export default {
       if (command === 'per_info') {
       } else if (command === 'logout') {
         logout().then(response => {
-          this.loginedUser = null
+          this.$store.commit('logined', response.data.data)
         })
       }
     }

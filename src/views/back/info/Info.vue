@@ -2,7 +2,7 @@
   <div>
     <div style="margin-bottom: 20px">
       <el-button type="primary" size="medium" @click="showCreateDialog">添加</el-button>
-      <el-button type="danger" size="medium" @click="deleteHandle">删除</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0">删除</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -34,7 +34,7 @@
             <el-input v-model="editItem.name" clearable></el-input>
           </el-form-item>
           <el-form-item label="负责人" style="display: inline-block; width: 50%">
-            <el-select v-model="editItem.charityId" placeholder="请选择" style="width: 100%" clearable>
+            <el-select v-model="editItem.charityId" placeholder="请选择" style="width: 100%" clearable filterable>
               <el-option v-for="item in userList" :key="item.id" :label="`${item.name}:${item.number}`" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -87,7 +87,7 @@ export default {
   },
   created () {
     this.getList()
-    fetchUsers().then(response => {
+    fetchUsers(this.qry).then(response => {
       this.userList = response.data.data
     })
   },

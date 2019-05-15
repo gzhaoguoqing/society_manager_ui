@@ -9,6 +9,7 @@ import FrontActivity from './views/front/activity/Activity'
 import FrontActivityDetail from './views/front/activity/ActivityDetail'
 import FrontTopic from './views/front/topic/Topic'
 import FrontPost from './views/front/topic/Post'
+import FrontInfo from './views/front/info/Info'
 import BackHome from './views/back/BackHome'
 import BackUser from './views/back/user/User'
 import BackInfo from './views/back/info/Info'
@@ -40,7 +41,8 @@ export default new Router({
         { path: 'activity', component: FrontActivity },
         { path: 'activity/detail/:id', component: FrontActivityDetail },
         { path: 'topic', component: FrontTopic },
-        { path: 'topic/post/:id', component: FrontPost }
+        { path: 'topic/post/:id', component: FrontPost },
+        { path: 'info', component: FrontInfo }
       ]
     },
     {

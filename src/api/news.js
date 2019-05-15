@@ -1,10 +1,25 @@
 import request from 'axios'
 
-export function fetchNews (params) {
+export function fetchNewses (params) {
   return request({
     url: '/news',
     method: 'get',
     params: params
+  })
+}
+
+export function fetchImportNewses (params) {
+  return request({
+    url: '/news/important',
+    method: 'get',
+    params: params
+  })
+}
+
+export function fetchNews (id) {
+  return request({
+    url: `/news/${id}`,
+    method: 'get'
   })
 }
 

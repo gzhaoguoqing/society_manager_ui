@@ -1,9 +1,9 @@
 <template>
   <el-row class="navigationBgColor">
-    <el-col :span="8">
+    <el-col :span="6">
       <div style="color: #545c64">a</div>
     </el-col>
-    <el-col :span="13">
+    <el-col :span="15">
       <el-menu
         :default-active="$route.path"
         class="el-menu-demo navigationCenter"
@@ -26,6 +26,9 @@
         </el-menu-item>
         <el-menu-item index="/front/topic" class="navigationItemWidth">
           <i class="iconfont icon-huati2 navigationIconPosition"></i>话题
+        </el-menu-item>
+        <el-menu-item index="/front/info" class="navigationItemWidth">
+          <i class="iconfont  icon-xinxi2 navigationIconPosition"></i>社团信息
         </el-menu-item>
       </el-menu>
     </el-col>

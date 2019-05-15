@@ -11,22 +11,25 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="association"
         label="社团"
-        width="280">
+        width="250">
+        <template slot-scope="scope">
+          <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
+        </template>
       </el-table-column>
       <el-table-column
         prop="date"
         label="日期"
-        width="120">
+        width="210">
       </el-table-column>
     </el-table>
-    <pagination :current-page="qry.page" :page-size="qry.size" :total="list.length" @page-change="getList"></pagination>
+    <pagination :current-page.sync="qry.page" :page-size.sync="qry.size" :total="total" @page-change="getList"></pagination>
   </div>
 </template>
 
 <script>
 import Pagination from '../../../components/Pagination'
+import { fetchNotices } from '../../../api/notice.js'
 
 export default {
   name: 'Notice',
@@ -36,20 +39,22 @@ export default {
         page: 1,
         size: 10
       },
-      list: [
-        { id: '1', title: 'biaoti1', association: '与马者自行车协会', date: '2018-03-06' },
-        { id: '2', title: 'biaoti2', association: '66轮滑社', date: '2018-03-07' },
-        { id: '3', title: 'biaoti3', association: '青年志愿者协会', date: '2018-03-08' },
-        { id: '4', title: 'biaoti4', association: '与马者自行车协会', date: '2018-03-09' },
-        { id: '5', title: 'biaoti5', association: '66轮滑社', date: '2018-03-10' }
-      ]
+      list: [],
+      total: 0
     }
   },
   components: {
     Pagination
   },
+  created () {
+    this.getList()
+  },
   methods: {
     getList () {
+      fetchNotices(this.qry).then(response => {
+        this.list = response.data.data
+        this.total = response.data.total
+      })
     }
   }
 }

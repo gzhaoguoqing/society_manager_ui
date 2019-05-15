@@ -30,3 +30,10 @@ export function updateUser (params) {
     data: params
   })
 }
+
+export function resetPwd (ids) {
+  return request({
+    url: `/user/${encodeURIComponent(ids)}`,
+    method: 'put'
+  })
+}

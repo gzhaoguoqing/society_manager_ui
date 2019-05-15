@@ -2,7 +2,7 @@
   <div>
     <div style="margin-bottom: 20px">
       <el-button type="primary" size="medium" @click="showCreateDialog">发布</el-button>
-      <el-button type="danger" size="medium" @click="deleteHandle">删除</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0">删除</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -83,7 +83,7 @@
 import Pagination from '../../../components/Pagination'
 import Editor from '../../../components/Editor'
 import { constant } from '../../../const/constant.js'
-import { fetchNews, saveNews, updateNews, deleteNews } from '../../../api/news.js'
+import { fetchNewses, saveNews, updateNews, deleteNews } from '../../../api/news.js'
 import { strJoin } from '../../../util/utils.js'
 import { cloneDeep } from 'lodash'
 
@@ -130,7 +130,7 @@ export default {
   },
   methods: {
     getList () {
-      fetchNews(this.qry).then(response => {
+      fetchNewses(this.qry).then(response => {
         this.list = response.data.data
         this.list.forEach(item => {
           item.important = item.important === 1
