@@ -13,7 +13,7 @@
       <el-button type="text" @click="loginVisible = true">登录</el-button>
     </div>
     <el-dialog
-      title="登陆"
+      title="登录"
       :visible.sync="loginVisible"
       width="35%"
       :before-close="loginHandleClose"

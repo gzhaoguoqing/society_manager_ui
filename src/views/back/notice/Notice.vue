@@ -137,6 +137,7 @@ export default {
         this.editItem.filePaths.push(item.path)
       })
       this.editItem.filePaths = strJoin(this.editItem.filePaths, ',')
+      delete this.editItem.fileList
       if (this.isEdit) {
         updateNotice(cloneDeep(this.editItem)).then(response => {
           this.$notify({

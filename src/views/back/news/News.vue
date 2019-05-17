@@ -155,6 +155,9 @@ export default {
           this.editItem[name] = item[name]
         }
       }
+      this.editItem.filePaths.forEach(path => {
+        this.editItem.fileList.push({ name: path.substring(path.lastIndexOf('/') + 1, path.length), path: path })
+      })
     },
     saveNewsHandle () {
       if (this.editItem.important) {

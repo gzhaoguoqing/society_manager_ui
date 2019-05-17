@@ -12,9 +12,9 @@
       @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="35">
       </el-table-column>
-      <el-table-column label="名称" prop="name"></el-table-column>
-      <el-table-column label="负责人" prop="charity.name"></el-table-column>
-      <el-table-column label="介绍" prop="info"></el-table-column>
+      <el-table-column label="名称" prop="name" width=""></el-table-column>
+      <el-table-column label="负责人" prop="charity.name" width="120"></el-table-column>
+      <el-table-column label="介绍" prop="info" width="700"></el-table-column>
       <el-table-column label="操作" width="110">
         <template slot-scope="scope">
           <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>

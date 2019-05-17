@@ -1,12 +1,13 @@
 <template>
   <div v-if="item !== null">
     <div align="center"><h2>{{item.title}}</h2></div>
-    <div align="right">日期：{{item.date}}  作者：{{item.author.name}}</div>
+    <div align="right" style="margin: 0px 20px 0px 0px">日期：{{item.date}}  作者：{{item.author.name}}</div>
     <hr style="height:1px; border:none; border-top:1px solid #ccc; margin: 20px 0px;">
-    <div style="white-space:pre">{{item.content}}</div>
+    <div style="white-space:pre; margin: 0px 20px;">{{item.content}}</div>
     <hr style="height:1px; border:none; border-top:1px solid #ccc; margin: 20px 0px;">
-    <div>
-      <a v-for="file in files" :key="file.path" :href="`${uploadFileUrl}?path=${encodeURIComponent(file.path)}`">
+    <div v-for="(file, idx) in files" :key="file.path" style="margin: 0px 20px;">
+      附件{{idx+1}}:
+      <a :href="`${uploadFileUrl}?path=${encodeURIComponent(file.path)}`">
         {{file.name}}
       </a>
     </div>

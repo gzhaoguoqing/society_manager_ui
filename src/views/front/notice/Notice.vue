@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div >
+      <el-input v-model="qry.title" size="medium" placeholder="请输入标题" clearable style="width: 200px;" @keyup.enter.native="getList"></el-input>
+      <el-button type="primary" size="medium" style="margin: 0px 10px;" @click="getList">查询</el-button>
+    </div>
     <el-table
         :data="list"
         style="width: 100%">
@@ -37,7 +41,8 @@ export default {
     return {
       qry: {
         page: 1,
-        size: 10
+        size: 10,
+        title: null
       },
       list: [],
       total: 0
