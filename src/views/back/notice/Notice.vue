@@ -27,7 +27,7 @@
     <el-dialog
       :title="isEdit ? '编辑' : '发布'"
       :visible.sync="editVisible"
-      width="60%"
+      width="70%"
       :before-close="editHandleClose">
       <div>
         <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">

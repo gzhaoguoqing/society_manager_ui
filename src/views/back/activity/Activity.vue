@@ -55,7 +55,7 @@
     <el-dialog
       :title="isEdit ? '编辑' : '发布'"
       :visible.sync="editVisible"
-      width="60%"
+      width="70%"
       :before-close="editHandleClose">
       <div>
         <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
@@ -106,7 +106,7 @@
       :visible.sync="applicantVisible"
       width="70%"
       :before-close="applicantHandleClose">
-      <applicant :applicants.sync="applicants"></applicant>
+      <applicant :activityId="activity.id"></applicant>
     </el-dialog>
   </div>
 </template>
@@ -156,7 +156,7 @@ export default {
         ImgUrl: constant.baseApiUrl + '/file/img'
       },
       labelTypes: ['', 'success', 'info', 'warning', 'danger'],
-      applicants: null
+      activity: cloneDeep(emptyItem)
     }
   },
   components: {
@@ -212,7 +212,7 @@ export default {
       this.editItem.filePaths = []
     },
     showApplicantDialog (item) {
-      this.applicants = item.participantors
+      this.activity = item
       this.applicantVisible = true
     },
     saveInfoHandle () {
