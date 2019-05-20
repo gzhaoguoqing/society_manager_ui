@@ -3,27 +3,27 @@
     <div style="text-align: left; margin: 0px 100px 10px 100px;">
       <el-button size="mini" type="primary" style="margin: 0px 0px 0px 5px;" @click="showPostDiglog">发帖</el-button>
     </div>
-    <el-card class="card" v-for="item in 10" :key="item">
+    <el-card class="card" v-for="item in list" :key="item.id">
       <div slot="header" class="card-header">
-        <span>admin</span>
+        <span>{{item.author.name}}</span>
       </div>
       <div>
         <div>
           <div>
-            据说上院宿舍又停水了，上院宿舍经常性停水，已经成为新常态，不知道各位童鞋有什么看法，发表一下吧。
+            {{item.content}}
           </div>
           <div style="margin: 10px 0px">
             本次话题：
             <span style="color: blue">#</span>
-            <router-link :to="`/front/topic/post/${item}`" style="text-decoration: none;"><span style="color: red">宿舍停水</span></router-link>
+            <router-link :to="`/front/topic/post/${item.id}`" style="text-decoration: none;"><span style="color: red">{{item.labels}}</span></router-link>
             <span style="color: blue">#</span>
           </div>
         </div>
       </div>
       <div>
         <hr style="height:1px; border:none; border-top:1px solid #eee; margin: 20px 0px 15px 0px">
-        <el-badge :value="1">
-          <router-link :to="`/front/topic/post/${item}`" style="text-decoration: none;">
+        <el-badge :value="item.postNum">
+          <router-link :to="`/front/topic/post/${item.id}`" style="text-decoration: none;">
             <el-button size="small">帖子</el-button>
           </router-link>
         </el-badge>
@@ -38,7 +38,7 @@
       <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 5px 15px;">
         <el-form-item label="话题" style="display: inline-block; width: 55%">
           <el-select v-model="editItem.topicIds" placeholder="请选择" style="width: 100%" filterable clearable multiple default-first-option>
-            <el-option v-for="item in []" :key="item" :label="item" :value="item"></el-option>
+            <el-option v-for="item in list" :key="item.id" :label="item.labels" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="内容">
@@ -50,8 +50,10 @@
             name="img"
             :action="uploadURL.uploadImgUrl"
             list-type="picture-card"
-            :on-remove="handleRemove"
-            style="margin-left: 80px">
+            :on-remove="handleUploadRemove"
+            :on-success="handleUploadSuccess"
+            style="margin-left: 80px"
+            :file-list="editItem.fileList">
             <i class="el-icon-plus"></i>
           </el-upload>
         </div>
@@ -66,23 +68,32 @@
 
 <script>
 import { constant } from '../../../const/constant.js'
+import { fetchTopics } from '../../../api/topic.js'
+import { savePost } from '../../../api/post.js'
 import { cloneDeep } from 'lodash'
 
 const emptyItem = {
   content: null,
   topicIds: [],
-  imgPaths: null
+  imgPaths: [],
+  fileList: []
 }
 
 export default {
   name: 'Topic',
   data () {
     return {
+      qry: {
+        page: 1,
+        size: 10
+      },
       editItem: cloneDeep(emptyItem),
       postDialogVisable: false,
+      list: [],
+      total: 0,
       uploadURL: {
         uploadImgUrl: constant.baseApiUrl + '/file/img',
-        ImgUrl: constant.baseApiUrl + '/file/img'
+        imgUrl: constant.baseApiUrl + '/file/img'
       }
     }
   },
@@ -91,6 +102,10 @@ export default {
   },
   methods: {
     getList () {
+      fetchTopics(this.qry).then(response => {
+        this.list = response.data.data
+        this.total = response.data.total
+      })
     },
     postDialogHandleClose () {
       this.postDialogVisable = false
@@ -100,6 +115,34 @@ export default {
       this.postDialogVisable = true
     },
     postHandle () {
+      this.editItem.topicIds = this.editItem.topicIds.join(',')
+      this.editItem.fileList.forEach(item => {
+        this.editItem.imgPaths.push(item.path)
+      })
+      this.editItem.imgPaths = this.editItem.imgPaths.join(',')
+      delete this.editItem.fileList
+      savePost(this.editItem).then(response => {
+        this.$notify({
+          title: '成功',
+          message: '发帖成功',
+          type: 'success'
+        })
+        this.getList()
+        this.postDialogVisable = false
+      })
+    },
+    handleUploadSuccess (response, file, fileList) {
+      this.editItem.fileList.push({ name: file.name, path: response.data, url: `${this.uploadURL.imgUrl}?path=${encodeURIComponent(response.data)}` })
+    },
+    handleUploadRemove (file, fileList) {
+      let index = -1
+      for (let i = 0; i < this.editItem.fileList.length; i++) {
+        if (this.editItem.fileList[i].uid === file.uid) {
+          index = i
+          break
+        }
+      }
+      this.editItem.fileList.splice(index, 1)
     }
   }
 }
