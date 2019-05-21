@@ -20,7 +20,7 @@
       <el-table-column label="操作" width="200">
         <template slot-scope="scope">
           <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>
-          <el-button size="small" type="primary">查看帖子</el-button>
+          <el-button size="small" type="primary" @click="showPostDiglog(scope.row)">查看帖子</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -46,11 +46,20 @@
         <el-button type="primary" size="medium" @click="saveTopicHandle">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="帖子"
+      :visible.sync="postDialogVisible"
+      width="70%"
+      :before-close="postHandleClose">
+      <post :topicId="topic !== null ? topic.id : ''"></post>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Pagination from '../../../components/Pagination'
+import Post from './Post'
 import { fetchTopics, saveTopic, deleteTopic, updateTopic } from '../../../api/topic.js'
 import { cloneDeep } from 'lodash'
 
@@ -71,13 +80,16 @@ export default {
       list: [],
       total: 0,
       editVisible: false,
+      postDialogVisible: false,
       isEdit: false,
       editItem: cloneDeep(emptyItem),
-      selections: []
+      selections: [],
+      topic: null
     }
   },
   components: {
-    Pagination
+    Pagination,
+    Post
   },
   created () {
     this.getList()
@@ -91,6 +103,13 @@ export default {
     },
     editHandleClose () {
       this.editVisible = false
+    },
+    postHandleClose () {
+      this.postDialogVisible = false
+    },
+    showPostDiglog (topic) {
+      this.topic = topic
+      this.postDialogVisible = true
     },
     showCreateDialog () {
       this.editVisible = true

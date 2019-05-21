@@ -18,7 +18,7 @@
       </el-table-column>
       <el-table-column
         prop="name"
-        label="标签">
+        label="姓名">
       </el-table-column>
       <el-table-column
         label="性别">

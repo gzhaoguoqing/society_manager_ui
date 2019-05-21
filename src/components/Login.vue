@@ -6,6 +6,8 @@
       </span>
       <el-dropdown-menu slot="dropdown" style="margin-left: 10px;">
         <el-dropdown-item command="per_info">个人信息</el-dropdown-item>
+        <el-dropdown-item v-if="!isFront" command="goto_front">前台</el-dropdown-item>
+        <el-dropdown-item v-else-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name !== '普通成员'" command="goto_back">后台</el-dropdown-item>
         <el-dropdown-item command="logout">退出</el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
@@ -40,13 +42,9 @@ import { login, logout, getLoginedUser } from '../api/login.js'
 
 export default {
   name: 'Login',
-  created () {
-    getLoginedUser().then(response => {
-      if (response.data.code === 1) {
-        this.$store.commit('logined', response.data.data)
-      }
-    })
-  },
+  props: [
+    'isFront'
+  ],
   data () {
     return {
       loginVisible: false,
@@ -54,10 +52,25 @@ export default {
       loginUser: {
         number: '',
         password: ''
-      }
+      },
+      interval: null
     }
   },
+  created () {
+    this.interval = window.setInterval(this.validateLoginState, 3000)
+    this.validateLoginState()
+  },
   methods: {
+    validateLoginState () {
+      getLoginedUser().then(response => {
+        if (response.data.code === 1) {
+          this.$store.commit('logined', response.data.data)
+        } else {
+          this.$store.commit('logined', null)
+          window.clearInterval(this.interval)
+        }
+      })
+    },
     loginHandleClose () {
       this.loginVisible = false
     },
@@ -67,6 +80,7 @@ export default {
         if (response.data.code === 1) {
           this.$store.commit('logined', response.data.data)
           this.loginVisible = false
+          this.interval = window.setInterval(this.validateLoginState, 3000)
         } else {
           this.$message.error('用户名或密码错误')
         }
@@ -76,9 +90,15 @@ export default {
     },
     dropdownHandle (command) {
       if (command === 'per_info') {
+
+      } else if (command === 'goto_front') {
+        this.$router.push({ path: '/' })
+      } else if (command === 'goto_back') {
+        this.$router.push({ path: '/back' })
       } else if (command === 'logout') {
         logout().then(response => {
           this.$store.commit('logined', response.data.data)
+          this.$router.push({ path: '/' })
         })
       }
     }

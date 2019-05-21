@@ -111,6 +111,10 @@ export default {
       this.postDialogVisable = false
     },
     showPostDiglog () {
+      if (this.$store.state.loginedUser === null) {
+        this.$message.error('请先登录')
+        return
+      }
       this.editItem = cloneDeep(emptyItem)
       this.postDialogVisable = true
     },

@@ -1,5 +1,8 @@
 <template>
-  <el-container>
+  <el-container
+    v-show="this.$store.state.loginedUser !== null
+          && (this.$store.state.loginedUser.role.name === '管理员'
+          || this.$store.state.loginedUser.role.name === '社团负责人')">
     <el-header style="padding:0px">
       <navigation></navigation>
     </el-header>
@@ -18,6 +21,11 @@ export default {
   name: 'BackHome',
   components: {
     Navigation
+  },
+  data () {
+    return {
+      roleName: null
+    }
   }
 }
 </script>

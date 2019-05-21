@@ -1,9 +1,9 @@
 <template>
   <el-row class="navigationBgColor">
-    <el-col :span="6">
+    <el-col :span="roleName === '社团负责人' ? 9 : 6">
       <div style="color: #545c64">a</div>
     </el-col>
-    <el-col :span="15">
+    <el-col :span="roleName === '社团负责人' ? 12 : 15">
       <el-menu
         :default-active="$route.path"
         class="el-menu-demo navigationCenter"
@@ -14,28 +14,28 @@
         active-text-color="#ffd04b"
         style="border-bottom-width:0px"
         router>
-        <el-menu-item index="/back/staff" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员' || roleName === '社团负责人'" index="/back/staff" class="navigationItemWidth">
           <i class="iconfont icon-chengyuan2 navigationIconPosition"></i>成员管理
         </el-menu-item>
-        <el-menu-item index="/back/info" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员'" index="/back/info" class="navigationItemWidth">
           <i class="iconfont icon-xinxi2 navigationIconPosition"></i>信息管理
         </el-menu-item>
-        <el-menu-item index="/back/news" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员'" index="/back/news" class="navigationItemWidth">
           <i class="iconfont  icon-xinwen navigationIconPosition"></i>新闻管理
         </el-menu-item>
-        <el-menu-item index="/back/notice" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员' || roleName === '社团负责人'" index="/back/notice" class="navigationItemWidth">
           <i class="iconfont icon-bulletin navigationIconPosition"></i>公告管理
         </el-menu-item>
-        <el-menu-item index="/back/activity" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员' || roleName === '社团负责人'" index="/back/activity" class="navigationItemWidth">
           <i class="iconfont icon-shouye navigationIconPosition"></i>活动管理
         </el-menu-item>
-        <el-menu-item index="/back/topic" class="navigationItemWidth">
+        <el-menu-item v-if="roleName === '管理员'" index="/back/topic" class="navigationItemWidth">
           <i class="iconfont icon-huati2 navigationIconPosition"></i>话题管理
         </el-menu-item>
       </el-menu>
     </el-col>
     <el-col :span="3" class="userInfo">
-      <login></login>
+      <login :isFront="false"></login>
     </el-col>
   </el-row>
 </template>
@@ -50,9 +50,18 @@ export default {
   },
   data () {
     return {
-      activeIndex: '1',
-      activeIndex2: '1'
+      roleName: null
     }
+  },
+  created () {
+    let self = this
+    let interval = window.setInterval(function () {
+      if (self.$store.state.loginedUser !== null) {
+        self.roleName = self.$store.state.loginedUser.role.name
+      } else {
+        window.clearInterval(interval)
+      }
+    }, 500)
   },
   methods: {
     handleSelect (key, keyPath) {

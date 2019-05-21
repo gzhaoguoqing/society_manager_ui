@@ -97,7 +97,7 @@ const emptyItem = {
   classes: null,
   contactWay: null,
   roleId: null,
-  associationIds: []
+  associationIds: null
 }
 
 export default {
@@ -154,7 +154,6 @@ export default {
       this.isEdit = true
       this.editItem = cloneDeep(emptyItem)
       for (let name in this.editItem) {
-        debugger
         if (item[name]) {
           this.editItem[name] = item[name]
         }

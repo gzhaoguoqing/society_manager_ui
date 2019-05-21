@@ -33,7 +33,7 @@
       </el-menu>
     </el-col>
     <el-col :span="3" class="userInfo">
-      <login></login>
+      <login :isFront="true"></login>
     </el-col>
   </el-row>
 </template>

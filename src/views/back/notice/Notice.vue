@@ -14,8 +14,13 @@
       <el-table-column type="selection" width="35">
       </el-table-column>
       <el-table-column label="标题" prop="title"></el-table-column>
-      <el-table-column label="发布时间" prop="date"></el-table-column>
-      <el-table-column label="发布者" prop="author.name"></el-table-column>
+      <el-table-column label="发布时间" prop="date" width="220"></el-table-column>
+      <el-table-column label="发布者" prop="author.name" width="220"></el-table-column>
+      <el-table-column label="社团" width="220">
+        <template slot-scope="scope">
+          <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="110">
         <template slot-scope="scope">
           <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>
