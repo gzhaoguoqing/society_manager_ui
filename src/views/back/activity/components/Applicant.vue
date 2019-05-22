@@ -3,6 +3,7 @@
     <div style="margin-bottom: 20px">
       <el-button type="primary" size="medium" @click="showCreateDialog">添加</el-button>
       <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0">删除</el-button>
+      <el-button type="primary" size="medium" @click="exportCsv">导出</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -187,6 +188,11 @@ export default {
         })
         this.getList()
       })
+    },
+    exportCsv () {
+      let exportFile = document.createElement('a')
+      exportFile.href = `/api/activity/applicant/export/${this.activityId}`
+      exportFile.click()
     }
   },
   watch: {

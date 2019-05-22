@@ -37,3 +37,11 @@ export function resetPwd (ids) {
     method: 'put'
   })
 }
+
+export function exportUsers (params) {
+  return request({
+    url: '/user/export',
+    method: 'get',
+    params: params
+  })
+}

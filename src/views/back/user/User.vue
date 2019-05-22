@@ -4,6 +4,7 @@
       <el-button type="primary" size="medium" @click="showCreateDialog" v-if="$store.state.loginedUser.role.name === '管理员'">添加</el-button>
       <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">删除</el-button>
       <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">重置密码</el-button>
+      <el-button type="primary" size="medium" @click="exportCsv">导出</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -222,6 +223,11 @@ export default {
         })
         this.$refs.tableRef.clearSelection()
       })
+    },
+    exportCsv () {
+      let exportFile = document.createElement('a')
+      exportFile.href = `/api/user/export?infoId=${this.qry.infoId !== null ? this.qry.infoId : ''}`
+      exportFile.click()
     }
   }
 }
