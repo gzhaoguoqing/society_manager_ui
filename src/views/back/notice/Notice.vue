@@ -14,9 +14,9 @@
       <el-table-column type="selection" width="35">
       </el-table-column>
       <el-table-column label="标题" prop="title"></el-table-column>
-      <el-table-column label="发布时间" prop="date" width="220"></el-table-column>
-      <el-table-column label="发布者" prop="author.name" width="220"></el-table-column>
-      <el-table-column label="社团" width="220">
+      <el-table-column label="发布时间" prop="date"></el-table-column>
+      <el-table-column label="发布者" prop="author.name"></el-table-column>
+      <el-table-column v-if="$store.state.loginedUser.role.name === '管理员' || true" label="社团">
         <template slot-scope="scope">
           <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
         </template>
@@ -85,7 +85,8 @@ export default {
     return {
       qry: {
         page: 1,
-        size: 10
+        size: 10,
+        authorId: null
       },
       list: [],
       total: 0,
@@ -102,10 +103,16 @@ export default {
     Pagination
   },
   created () {
-    this.getList()
+    let self = this
+    window.setTimeout(function () {
+      self.getList()
+    }, 1000)
   },
   methods: {
     getList () {
+      if (this.$store.state.loginedUser.role.name !== '管理员') {
+        this.qry.authorId = this.$store.state.loginedUser.id
+      }
       fetchNotices(this.qry).then(response => {
         this.list = response.data.data
         this.total = response.data.total
