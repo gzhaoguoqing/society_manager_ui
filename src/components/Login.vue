@@ -34,11 +34,37 @@
         <el-button type="primary" @click="userLogin" :loading="logining">登陆</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      title="个人信息"
+      :visible.sync="personInfoVisible"
+      width="30%"
+      :before-close="personInfoHandleClose"
+      center>
+      <div align="center">
+        <el-table
+            :data="personInfoItems"
+            style="width: 100%">
+          <el-table-column
+            prop="name"
+            align="right"
+            width="200">
+          </el-table-column>
+          <el-table-column
+            prop="value">
+          </el-table-column>
+        </el-table>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="danger" @click="resetPwd">修改密码</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { login, logout, getLoginedUser } from '../api/login.js'
+import { updateUser } from '../api/user'
 
 export default {
   name: 'Login',
@@ -53,7 +79,9 @@ export default {
         number: '',
         password: ''
       },
-      interval: null
+      interval: null,
+      personInfoVisible: false,
+      personInfoItems: []
     }
   },
   created () {
@@ -90,7 +118,7 @@ export default {
     },
     dropdownHandle (command) {
       if (command === 'per_info') {
-
+        this.personInfoShow()
       } else if (command === 'goto_front') {
         this.$router.push({ path: '/' })
       } else if (command === 'goto_back') {
@@ -101,6 +129,40 @@ export default {
           this.$router.push({ path: '/' })
         })
       }
+    },
+    personInfoShow () {
+      const loginedUser = this.$store.state.loginedUser
+      this.personInfoItems = []
+      this.personInfoItems.push({ name: '学号/工号：', value: loginedUser.number })
+      this.personInfoItems.push({ name: '姓名：', value: loginedUser.name })
+      this.personInfoItems.push({ name: '性别：', value: loginedUser.sex === 0 ? '男' : '女' })
+      this.personInfoItems.push({ name: '联系方式：', value: loginedUser.contactWay })
+      this.personInfoItems.push({ name: '角色：', value: loginedUser.role.name })
+      this.personInfoItems.push({ name: '社团：', value: loginedUser.associations.length > 0 ? loginedUser.associations[0].name : '' })
+      this.personInfoVisible = true
+    },
+    personInfoHandleClose () {
+      this.personInfoVisible = false
+    },
+    resetPwd () {
+      this.$prompt('请输入密码', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputType: 'password'
+      }).then(({ value }) => {
+        updateUser({ id: this.$store.state.loginedUser.id, password: value }).then(response => {
+          logout().then(response => {
+            this.$store.commit('logined', response.data.data)
+            this.$router.push({ path: '/' })
+          })
+          this.personInfoHandleClose()
+          this.$notify({
+            title: '成功',
+            message: '密码修改成功',
+            type: 'success'
+          })
+        })
+      })
     }
   }
 }

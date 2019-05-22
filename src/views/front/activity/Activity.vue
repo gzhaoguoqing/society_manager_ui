@@ -20,7 +20,7 @@
         label="社团"
         width="180">
         <template slot-scope="scope">
-          <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
+          <el-tag size="small">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column

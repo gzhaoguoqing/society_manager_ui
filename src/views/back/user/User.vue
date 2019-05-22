@@ -1,9 +1,9 @@
 <template>
   <div>
     <div style="margin-bottom: 20px">
-      <el-button type="primary" size="medium" @click="showCreateDialog">添加</el-button>
-      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0">删除</el-button>
-      <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0">重置密码</el-button>
+      <el-button type="primary" size="medium" @click="showCreateDialog" v-if="$store.state.loginedUser.role.name === '管理员'">添加</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">删除</el-button>
+      <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">重置密码</el-button>
     </div>
     <el-table :data="list"
       style="width: 100%"
@@ -23,12 +23,12 @@
       <el-table-column label="班级" prop="classes"></el-table-column>
       <el-table-column label="联系方式" prop="contactWay"></el-table-column>
       <el-table-column label="角色" prop="role.name"></el-table-column>
-      <el-table-column label="社团">
+      <el-table-column label="社团" v-if="$store.state.loginedUser.role.name === '管理员'">
         <template slot-scope="scope">
           <el-tag v-for="item in scope.row.associations" :key="item.id" size="small">{{item.name}}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110">
+      <el-table-column label="操作" width="110" v-if="$store.state.loginedUser.role.name === '管理员'">
         <template slot-scope="scope">
           <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>
         </template>
@@ -66,7 +66,7 @@
               <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="社团" style="display: inline-block; width: 50%">
+          <el-form-item v-if="editItem.roleId !== 'a6ae79cace744ec08f1bc506de066e37'" label="社团" style="display: inline-block; width: 50%">
             <el-select v-model="editItem.associationIds" placeholder="请选择" style="width: 100%" clearable>
               <el-option v-for="item in infoList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
@@ -106,7 +106,8 @@ export default {
     return {
       qry: {
         page: 1,
-        size: 10
+        size: 10,
+        infoId: null
       },
       total: 0,
       list: [],
@@ -122,7 +123,7 @@ export default {
     Pagination
   },
   created () {
-    this.getList()
+    window.setTimeout(this.getList, 300)
     fetchInfos().then(response => {
       this.infoList = response.data.data
     })
@@ -136,6 +137,9 @@ export default {
       this.qry.size = data.size
     },
     getList () {
+      if (this.$store.state.loginedUser.role.name === '社团负责人') {
+        this.qry.infoId = this.$store.state.loginedUser.associations[0].id
+      }
       fetchUsers(this.qry).then(response => {
         this.list = response.data.data
         this.total = response.data.total

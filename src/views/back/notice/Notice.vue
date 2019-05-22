@@ -16,9 +16,9 @@
       <el-table-column label="标题" prop="title"></el-table-column>
       <el-table-column label="发布时间" prop="date"></el-table-column>
       <el-table-column label="发布者" prop="author.name"></el-table-column>
-      <el-table-column v-if="$store.state.loginedUser.role.name === '管理员' || true" label="社团">
+      <el-table-column v-if="$store.state.loginedUser.role.name === '管理员'" label="社团">
         <template slot-scope="scope">
-          <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
+          <el-tag size="small">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="110">
@@ -86,7 +86,7 @@ export default {
       qry: {
         page: 1,
         size: 10,
-        authorId: null
+        associationId: null
       },
       list: [],
       total: 0,
@@ -106,12 +106,12 @@ export default {
     let self = this
     window.setTimeout(function () {
       self.getList()
-    }, 1000)
+    }, 300)
   },
   methods: {
     getList () {
       if (this.$store.state.loginedUser.role.name !== '管理员') {
-        this.qry.authorId = this.$store.state.loginedUser.id
+        this.qry.associationId = this.$store.state.loginedUser.associations.length > 0 ? this.$store.state.loginedUser.associations[0].id : null
       }
       fetchNotices(this.qry).then(response => {
         this.list = response.data.data

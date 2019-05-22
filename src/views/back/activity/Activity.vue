@@ -19,22 +19,25 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="标签"
-        width="250">
+        label="标签">
         <template slot-scope="scope">
           <el-tag v-for="(item, idx) in scope.row.labels" :key="item" size="small" :type="getLabelType(item)" :style="idx>0 ? { 'margin-left': '6px' } : {}">{{item}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
         label="社团"
-        width="200">
+        v-if="$store.state.loginedUser.role.name === '管理员'">
         <template slot-scope="scope">
-          <el-tag v-for="item in scope.row.author.associations" :key="item.id" size="small">{{item.name}}</el-tag>
+          <el-tag size="small">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
+        label="发布者"
+        prop="author.name">
+      </el-table-column>
+      <el-table-column
         label="报名时间"
-        width="280">
+        width="290">
         <template slot-scope="scope">
           <span v-if="scope.row.applyUp" style="font-size: 12px">
             {{scope.row.applyStartTime}} 至 {{scope.row.applyEndTime}}
@@ -138,7 +141,8 @@ export default {
     return {
       qry: {
         page: 1,
-        size: 10
+        size: 10,
+        associationId: null
       },
       list: [],
       total: 0,
@@ -165,10 +169,13 @@ export default {
     Applicant
   },
   created () {
-    this.getList()
+    window.setTimeout(this.getList, 300)
   },
   methods: {
     getList () {
+      if (this.$store.state.loginedUser.role.name !== '管理员') {
+        this.qry.associationId = this.$store.state.loginedUser.associations.length > 0 ? this.$store.state.loginedUser.associations[0].id : null
+      }
       fetchActivitys(this.qry).then(response => {
         this.list = response.data.data
         this.total = response.data.total
