@@ -1,9 +1,9 @@
 <template>
   <div>
     <div style="margin-bottom: 20px">
-      <el-button type="primary" size="medium" @click="showCreateDialog" v-if="$store.state.loginedUser.role.name === '管理员'">添加</el-button>
-      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">删除</el-button>
-      <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser.role.name === '管理员'">重置密码</el-button>
+      <el-button type="primary" size="medium" @click="showCreateDialog" v-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name === '管理员'">添加</el-button>
+      <el-button type="danger" size="medium" @click="deleteHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name === '管理员'">删除</el-button>
+      <el-button type="danger" size="medium" @click="resetPwdHandle" :disabled="selections.length === 0" v-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name === '管理员'">重置密码</el-button>
       <el-button type="primary" size="medium" @click="exportCsv">导出</el-button>
     </div>
     <el-table :data="list"
@@ -24,12 +24,12 @@
       <el-table-column label="班级" prop="classes"></el-table-column>
       <el-table-column label="联系方式" prop="contactWay"></el-table-column>
       <el-table-column label="角色" prop="role.name"></el-table-column>
-      <el-table-column label="社团" v-if="$store.state.loginedUser.role.name === '管理员'">
+      <el-table-column label="社团" v-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name === '管理员'">
         <template slot-scope="scope">
           <el-tag v-for="item in scope.row.associations" :key="item.id" size="small">{{item.name}}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="110" v-if="$store.state.loginedUser.role.name === '管理员'">
+      <el-table-column label="操作" width="110" v-if="$store.state.loginedUser !== null && $store.state.loginedUser.role.name === '管理员'">
         <template slot-scope="scope">
           <el-button size="small" type="primary" @click="showEditDialog(scope.row)">编辑</el-button>
         </template>
@@ -63,12 +63,12 @@
             <el-input v-model="editItem.contactWay" clearable></el-input>
           </el-form-item>
           <el-form-item label="角色" style="display: inline-block; width: 50%">
-            <el-select v-model="editItem.roleId" placeholder="请选择" style="width: 100%" clearable>
+            <el-select v-model="editItem.roleId" placeholder="请选择" style="width: 100%" clearable @change="changeRole">
               <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item v-if="editItem.roleId !== 'a6ae79cace744ec08f1bc506de066e37'" label="社团" style="display: inline-block; width: 50%">
-            <el-select v-model="editItem.associationIds" placeholder="请选择" style="width: 100%" clearable>
+            <el-select v-model="editItem.associationIds" placeholder="请选择" style="width: 100%" clearable :multiple="editItem.roleId === '2f58614346604c1383c6d9aca063f01d'">
               <el-option v-for="item in infoList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -98,7 +98,7 @@ const emptyItem = {
   classes: null,
   contactWay: null,
   roleId: null,
-  associationIds: null
+  associationIds: []
 }
 
 export default {
@@ -153,6 +153,7 @@ export default {
       this.editVisible = true
       this.isEdit = false
       this.editItem = cloneDeep(emptyItem)
+      this.editItem.roleId = this.roleList[0].id
     },
     showEditDialog (item) {
       this.editVisible = true
@@ -168,9 +169,16 @@ export default {
       item.associations.forEach(it => {
         assocIds.push(it.id)
       })
-      this.editItem.associationIds = strJoin(assocIds, ',')
+      if (this.editItem.roleId === '2f58614346604c1383c6d9aca063f01d') {
+        this.editItem.associationIds = assocIds
+      } else {
+        this.editItem.associationIds = strJoin(assocIds, ',')
+      }
     },
     saveUserHandle () {
+      if (this.editItem.roleId === '2f58614346604c1383c6d9aca063f01d') {
+        this.editItem.associationIds = strJoin(this.editItem.associationIds, ',')
+      }
       if (this.isEdit) {
         updateUser(cloneDeep(this.editItem)).then(response => {
           this.$notify({
@@ -226,8 +234,18 @@ export default {
     },
     exportCsv () {
       let exportFile = document.createElement('a')
-      exportFile.href = `/api/user/export?infoId=${this.qry.infoId !== null ? this.qry.infoId : ''}`
+      exportFile.href = `/api/user/export`
+      if (this.$store.state.loginedUser.role.name === '社团负责人') {
+        exportFile.href += `?infoId=${this.qry.infoId !== null ? this.qry.infoId : ''}`
+      }
       exportFile.click()
+    },
+    changeRole () {
+      if (this.editItem.roleId === '2f58614346604c1383c6d9aca063f01d') {
+        this.editItem.associationIds = []
+      } else {
+        this.editItem.associationIds = null
+      }
     }
   }
 }
