@@ -61,8 +61,8 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="标题">
+        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="标题" prop="title">
             <el-input v-model="editItem.title" clearable></el-input>
           </el-form-item>
           <el-form-item label="标签" style="display: inline-block; width: 55%">
@@ -70,10 +70,10 @@
               <el-option v-for="item in []" :key="item" :label="item" :value="item"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="开启报名">
+          <el-form-item label="开启报名" prop="applyUp">
             <el-switch v-model="editItem.applyUp" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
           </el-form-item>
-          <el-form-item label="报名时间" v-if="editItem.applyUp">
+          <el-form-item label="报名时间" v-if="editItem.applyUp" prop="date">
             <el-date-picker v-model="editItem.applyStartTime" type="datetimerange" style="width: 50%"
                 :picker-options="pickerOptions" :editable="false" value-format="yyyy-MM-dd HH:mm:ss"
                 start-placeholder="开始时间" range-separator="至" end-placeholder="结束时间">
@@ -92,7 +92,10 @@
             </el-upload>
           </el-form-item>
           <div style="margin-top: 30px;">
-            <span style="margin-left: 40px; padding-bottom: 20px; display: inline-block; float: left">内容</span>
+            <span style="margin-left: 30px; padding-bottom: 20px; display: inline-block; float: left">
+              <font color="red">*</font>
+              内容
+            </span>
             <div style="padding-left: 10px; margin-bottom: 50px; margin-left: 70px;">
               <editor :content.sync="editItem.content" :options="uploadURL" height="500px"></editor>
             </div>
@@ -160,7 +163,15 @@ export default {
         ImgUrl: constant.baseApiUrl + '/file/img'
       },
       labelTypes: ['', 'success', 'info', 'warning', 'danger'],
-      activity: cloneDeep(emptyItem)
+      activity: cloneDeep(emptyItem),
+      rules: {
+        title: [
+          { required: true, message: '标题不能为空', trigger: 'blur' }
+        ],
+        applyUp: [
+          { required: true, message: '开启报名不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -193,6 +204,7 @@ export default {
       }
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     applicantHandleClose () {
@@ -223,6 +235,16 @@ export default {
       this.applicantVisible = true
     },
     saveInfoHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.editItem.applyUp) {
         this.editItem.applyUp = 1
       } else {

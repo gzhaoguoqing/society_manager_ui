@@ -2,7 +2,7 @@ import axios from 'axios'
 import { constant } from './const/constant.js'
 
 axios.defaults.baseURL = constant.baseApiUrl
-axios.defaults.headers.common['Authorization'] = 'meipeizhi'
+// axios.defaults.headers.common['Authorization'] = 'meipeizhi'
 axios.defaults.timeout = 20 * 1000
 axios.defaults.withCredentials = true
 

@@ -18,7 +18,7 @@
         label="社团"
         width="250">
         <template slot-scope="scope">
-          <el-tag size="small">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
+          <el-tag size="small" v-if="scope.row.association !== null">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column

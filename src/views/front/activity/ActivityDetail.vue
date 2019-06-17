@@ -3,13 +3,24 @@
     <div align="center"><h2>{{item.title}}</h2></div>
     <div align="right" style="margin: 0px 20px 0px 0px">社团：{{item.author.associations[0].name}}</div>
     <hr style="height:1px; border:none; border-top:1px solid #ccc; margin: 20px 0px;">
-    <div style="white-space:pre; margin: 0px 20px;" class="ql-editor" v-html="item.content"></div>
+    <div style="margin: 0px 20px;white-space:pre-wrap;word-break:break-all;" class="ql-editor" v-html="item.content"></div>
     <hr style="height:1px; border:none; border-top:1px solid #ccc; margin: 20px 0px;">
     <div v-if="item.applyUp" style="margin: 0px 20px;">
-      本次活动已经开启报名，当前报名人数：
-      <span style="color: blue">{{item.participantors.length}}</span>，
-      您可以&nbsp;
-      <el-button type="primary" size="mini" style="padding: 3px;" @click="showApplyDiglog">报名</el-button>
+      <div v-if="new Date(item.applyStartTime) > new Date()">
+        本次活动报名尚未开始，开始时间：
+        <span style="color: blue"> {{item.applyStartTime}} </span>
+      </div>
+      <div v-else-if="new Date(item.applyEndTime) < new Date()">
+        本次活动报名已经于
+        <span style="color: blue">{{item.applyEndTime}}</span>
+        结束
+      </div>
+      <div v-else>
+        本次活动已经开启报名，当前报名人数：
+        <span style="color: blue">{{item.participantors.length}}</span>，
+        您可以&nbsp;
+        <el-button type="primary" size="mini" style="padding: 3px;" @click="showApplyDiglog">报名</el-button>
+      </div>
     </div>
     <el-dialog
       title="报名"

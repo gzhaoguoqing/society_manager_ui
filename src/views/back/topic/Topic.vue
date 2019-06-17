@@ -32,17 +32,17 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="名称">
+        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="名称" prop="labels">
             <el-input v-model="editItem.labels" clearable></el-input>
           </el-form-item>
-          <el-form-item label="内容">
+          <el-form-item label="内容" prop="content">
             <el-input v-model="editItem.content" type="textarea" :rows="12" clearable></el-input>
           </el-form-item>
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer" style="margin-right: 28px">
-        <el-button @click="editVisible = false" size="medium">取 消</el-button>
+        <el-button @click="editHandleClose" size="medium">取 消</el-button>
         <el-button type="primary" size="medium" @click="saveTopicHandle">确 定</el-button>
       </span>
     </el-dialog>
@@ -84,7 +84,15 @@ export default {
       isEdit: false,
       editItem: cloneDeep(emptyItem),
       selections: [],
-      topic: null
+      topic: null,
+      rules: {
+        labels: [
+          { required: true, message: '名称不能为空', trigger: 'blur' }
+        ],
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -102,6 +110,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     postHandleClose () {
@@ -127,6 +136,16 @@ export default {
       }
     },
     saveTopicHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.isEdit) {
         updateTopic(cloneDeep(this.editItem)).then(response => {
           this.$notify({

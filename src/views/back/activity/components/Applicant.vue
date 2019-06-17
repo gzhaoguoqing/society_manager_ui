@@ -50,23 +50,23 @@
       :before-close="editHandleClose"
       append-to-body>
       <div>
-        <el-form ref="itemApplicantForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="学号">
+        <el-form ref="itemApplicantForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="学号" prop="number">
             <el-input v-model="editItem.number" clearable></el-input>
           </el-form-item>
-          <el-form-item label="姓名">
+          <el-form-item label="姓名" prop="name">
             <el-input v-model="editItem.name" clearable></el-input>
           </el-form-item>
-          <el-form-item label="性别">
+          <el-form-item label="性别" prop="sex">
             <el-radio-group v-model="editItem.sex">
               <el-radio :label="0">男</el-radio>
               <el-radio :label="1">女</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="班级">
+          <el-form-item label="班级" prop="classes">
             <el-input v-model="editItem.classes" clearable></el-input>
           </el-form-item>
-          <el-form-item label="电话">
+          <el-form-item label="电话" prop="phone">
             <el-input v-model="editItem.phone" clearable></el-input>
           </el-form-item>
         </el-form>
@@ -112,7 +112,24 @@ export default {
       isEdit: false,
       editItem: cloneDeep(emptyItem),
       selections: [],
-      allList: []
+      allList: [],
+      rules: {
+        number: [
+          { required: true, message: '学号/工号不能为空', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '姓名不能为空', trigger: 'blur' }
+        ],
+        sex: [
+          { required: true, message: '性别不能为空', trigger: 'blur' }
+        ],
+        classes: [
+          { required: true, message: '班级不能为空', trigger: 'blur' }
+        ],
+        phone: [
+          { required: true, message: '电话不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -132,6 +149,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemApplicantForm'].resetFields()
       this.editVisible = false
     },
     showCreateDialog () {
@@ -150,6 +168,16 @@ export default {
       }
     },
     saveApplicantHandle () {
+      let isLegal = true
+      this.$refs['itemApplicantForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.isEdit) {
         updateApplicant(cloneDeep(this.editItem)).then(response => {
           this.$notify({

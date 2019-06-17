@@ -29,19 +29,23 @@
         </el-badge>
       </div>
     </el-card>
+    <div align="center">
+      <el-button style="width:150px" @click="loadMoreData" v-if="hasMoreData">加载更多</el-button>
+      <div v-else>没有更多数据</div>
+    </div>
     <el-dialog
       title="发帖"
       :visible.sync="postDialogVisable"
       width="60%"
       :before-close="postDialogHandleClose"
       center>
-      <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 5px 15px;">
-        <el-form-item label="话题" style="display: inline-block; width: 55%">
+      <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 5px 15px;" :rules="rules">
+        <el-form-item label="话题" style="display: inline-block; width: 55%" prop="topicIds">
           <el-select v-model="editItem.topicIds" placeholder="请选择" style="width: 100%" filterable clearable multiple default-first-option>
             <el-option v-for="item in list" :key="item.id" :label="item.labels" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="内容">
+        <el-form-item label="内容" prop="content">
           <el-input v-model="editItem.content" type="textarea" :rows="10" clearable></el-input>
         </el-form-item>
         <div>
@@ -82,6 +86,11 @@ const emptyItem = {
 export default {
   name: 'Topic',
   data () {
+    var topicValidator = (rule, value, callback) => {
+      if (!value || value.length === 0) {
+        callback(new Error('话题不能为空'))
+      }
+    }
     return {
       qry: {
         page: 1,
@@ -94,6 +103,15 @@ export default {
       uploadURL: {
         uploadImgUrl: constant.baseApiUrl + '/file/img',
         imgUrl: constant.baseApiUrl + '/file/img'
+      },
+      hasMoreData: true,
+      rules: {
+        topicIds: [
+          { required: true, validator: topicValidator, trigger: 'change' }
+        ],
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
+        ]
       }
     }
   },
@@ -105,9 +123,13 @@ export default {
       fetchTopics(this.qry).then(response => {
         this.list = response.data.data
         this.total = response.data.total
+        if (this.total === this.list.length) {
+          this.hasMoreData = false
+        }
       })
     },
     postDialogHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.postDialogVisable = false
     },
     showPostDiglog () {
@@ -119,6 +141,16 @@ export default {
       this.postDialogVisable = true
     },
     postHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       this.editItem.topicIds = this.editItem.topicIds.join(',')
       this.editItem.fileList.forEach(item => {
         this.editItem.imgPaths.push(item.path)
@@ -147,6 +179,15 @@ export default {
         }
       }
       this.editItem.fileList.splice(index, 1)
+    },
+    loadMoreData () {
+      this.qry.size *= 2
+      fetchTopics(this.qry).then(response => {
+        this.list = response.data.data
+        if (this.total === this.list.length) {
+          this.hasMoreData = false
+        }
+      })
     }
   }
 }

@@ -52,6 +52,10 @@
         </div>
       </div>
     </el-card>
+    <div align="center">
+      <el-button style="width:150px" @click="loadMoreData" v-if="hasMoreData">加载更多</el-button>
+      <div v-else>没有更多数据</div>
+    </div>
   </div>
 </template>
 
@@ -78,7 +82,8 @@ export default {
       showComment: false,
       itemlist: [],
       total: 0,
-      imgUrl: constant.baseApiUrl + '/file/img'
+      imgUrl: constant.baseApiUrl + '/file/img',
+      hasMoreData: true
     }
   },
   created () {
@@ -95,6 +100,9 @@ export default {
           this.itemlist.push(item)
         })
         this.total = response.data.total
+        if (this.total === this.itemlist.length) {
+          this.hasMoreData = false
+        }
       })
     },
     showNewComment (item) {
@@ -132,6 +140,20 @@ export default {
         return 'color:#409EFF'
       }
       return ''
+    },
+    loadMoreData () {
+      this.qry.size *= 2
+      fetchPosts(this.qry).then(response => {
+        this.itemlist = []
+        response.data.data.forEach(element => {
+          let item = cloneDeep(emptyItem)
+          item.data = element
+          this.itemlist.push(item)
+        })
+        if (this.total === this.itemlist.length) {
+          this.hasMoreData = false
+        }
+      })
     }
   }
 }

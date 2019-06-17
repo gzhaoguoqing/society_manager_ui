@@ -43,31 +43,31 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="学号">
+        <el-form ref="itemForm" :model="editItem" label-width="85px" style="margin: 30px" :rules="rules">
+          <el-form-item label="学号/工号" prop="number">
             <el-input v-model="editItem.number" clearable></el-input>
           </el-form-item>
-          <el-form-item label="姓名">
+          <el-form-item label="姓名" prop="name">
             <el-input v-model="editItem.name" clearable></el-input>
           </el-form-item>
-          <el-form-item label="性别">
+          <el-form-item label="性别" prop="sex">
             <el-radio-group v-model="editItem.sex">
               <el-radio :label="0">男</el-radio>
               <el-radio :label="1">女</el-radio>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="班级">
+          <el-form-item label="班级" prop="classes">
             <el-input v-model="editItem.classes" clearable></el-input>
           </el-form-item>
-          <el-form-item label="联系方式">
+          <el-form-item label="联系方式" prop="contactWay">
             <el-input v-model="editItem.contactWay" clearable></el-input>
           </el-form-item>
-          <el-form-item label="角色" style="display: inline-block; width: 50%">
-            <el-select v-model="editItem.roleId" placeholder="请选择" style="width: 100%" clearable @change="changeRole">
+          <el-form-item label="角色" style="display: inline-block; width: 50%" prop="roleId">
+            <el-select v-model="editItem.roleId" placeholder="请选择" style="width: 100%" @change="changeRole">
               <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item v-if="editItem.roleId !== 'a6ae79cace744ec08f1bc506de066e37'" label="社团" style="display: inline-block; width: 50%">
+          <el-form-item v-if="editItem.roleId !== 'a6ae79cace744ec08f1bc506de066e37'" label="社团" style="display: inline-block; width: 50%" prop="associationIds">
             <el-select v-model="editItem.associationIds" placeholder="请选择" style="width: 100%" clearable :multiple="editItem.roleId === '2f58614346604c1383c6d9aca063f01d'">
               <el-option v-for="item in infoList" :key="item.id" :label="item.name" :value="item.id"></el-option>
             </el-select>
@@ -75,7 +75,7 @@
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer" style="margin-right: 28px">
-        <el-button @click="editVisible = false" size="medium">取 消</el-button>
+        <el-button @click="editHandleClose" size="medium">取 消</el-button>
         <el-button type="primary" size="medium" @click="saveUserHandle">确 定</el-button>
       </span>
     </el-dialog>
@@ -117,7 +117,30 @@ export default {
       editVisible: false,
       isEdit: false,
       editItem: cloneDeep(emptyItem),
-      selections: []
+      selections: [],
+      rules: {
+        number: [
+          { required: true, message: '学号/工号不能为空', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '姓名不能为空', trigger: 'blur' }
+        ],
+        sex: [
+          { required: true, message: '性别不能为空', trigger: 'blur' }
+        ],
+        classes: [
+          { required: true, message: '班级不能为空', trigger: 'blur' }
+        ],
+        contactWay: [
+          { required: true, message: '联系方式不能为空', trigger: 'blur' }
+        ],
+        roleId: [
+          { required: true, message: '角色不能为空', trigger: 'change' }
+        ],
+        associationIds: [
+          { required: true, message: '社团不能为空', trigger: 'change' }
+        ]
+      }
     }
   },
   components: {
@@ -147,6 +170,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     showCreateDialog () {
@@ -176,6 +200,16 @@ export default {
       }
     },
     saveUserHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.editItem.roleId === '2f58614346604c1383c6d9aca063f01d') {
         this.editItem.associationIds = strJoin(this.editItem.associationIds, ',')
       }

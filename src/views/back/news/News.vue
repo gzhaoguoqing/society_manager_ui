@@ -39,18 +39,21 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="标题">
+        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="标题" prop="title">
             <el-input v-model="editItem.title" clearable></el-input>
           </el-form-item>
-          <el-form-item label="发布时间">
+          <!-- <el-form-item label="发布时间">
             <el-date-picker v-model="editItem.date" type="datetime" placeholder="选择发布时间" style="width: 45%" :picker-options="pickerOptions" :editable="false" value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
-          </el-form-item>
-          <el-form-item label="重要新闻">
+          </el-form-item> -->
+          <el-form-item label="重要新闻" required>
             <el-switch v-model="editItem.important" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
           </el-form-item>
           <div v-if="editItem.important">
-            <span style="margin-left: 40px; padding-bottom: 20px; display: inline-block; float: left;">封面</span>
+            <span style="margin-left: 30px; padding-bottom: 20px; display: inline-block; float: left;">
+              <font color="red">*</font>
+              封面
+            </span>
             <el-upload
               name="img"
               class="avatar-uploader"
@@ -64,7 +67,10 @@
             </el-upload>
           </div>
           <div style="margin-top: 30px;">
-            <span style="margin-left: 40px; padding-bottom: 20px; display: inline-block; float: left">内容</span>
+            <span style="margin-left: 30px; padding-bottom: 20px; display: inline-block; float: left">
+              <font color="red">*</font>
+              内容
+            </span>
             <div style="padding-left: 10px; margin-bottom: 50px; margin-left: 70px;">
               <editor :content.sync="editItem.content" :options="uploadURL" height="500px"></editor>
             </div>
@@ -118,7 +124,12 @@ export default {
         uploadImgUrl: constant.baseApiUrl + '/file/img',
         ImgUrl: constant.baseApiUrl + '/file/img'
       },
-      selections: []
+      selections: [],
+      rules: {
+        title: [
+          { required: true, message: '标题不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -139,6 +150,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     showCreateDialog () {
@@ -160,6 +172,16 @@ export default {
       })
     },
     saveNewsHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.editItem.important) {
         this.editItem.important = 1
       } else {

@@ -18,7 +18,7 @@
       <el-table-column label="发布者" prop="author.name"></el-table-column>
       <el-table-column v-if="$store.state.loginedUser.role.name === '管理员'" label="社团">
         <template slot-scope="scope">
-          <el-tag size="small">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
+          <el-tag size="small" v-if="scope.row.association !== null">{{scope.row.association !== null ? scope.row.association.name : ''}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="110">
@@ -35,8 +35,8 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="标题">
+        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="标题" prop="title">
             <el-input v-model="editItem.title" clearable></el-input>
           </el-form-item>
           <el-form-item label="附件">
@@ -51,13 +51,13 @@
               <el-button size="small" type="primary">上传文件</el-button>
             </el-upload>
           </el-form-item>
-          <el-form-item label="内容">
+          <el-form-item label="内容" prop="content">
             <el-input v-model="editItem.content" type="textarea" :rows="10" clearable></el-input>
           </el-form-item>
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer" style="margin-right: 28px">
-        <el-button @click="editVisible = false" size="medium">取 消</el-button>
+        <el-button @click="editHandleClose" size="medium">取 消</el-button>
         <el-button type="primary" size="medium" @click="saveNewsHandle">确 定</el-button>
       </span>
     </el-dialog>
@@ -96,7 +96,15 @@ export default {
       uploadURL: {
         uploadFileUrl: constant.baseApiUrl + '/file'
       },
-      selections: []
+      selections: [],
+      rules: {
+        title: [
+          { required: true, message: '标题不能为空', trigger: 'blur' }
+        ],
+        content: [
+          { required: true, message: '内容不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -119,6 +127,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     uploadSuccess (response, file, fileList) {
@@ -145,6 +154,16 @@ export default {
       })
     },
     saveNewsHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       this.editItem.fileList.forEach(item => {
         this.editItem.filePaths.push(item.path)
       })

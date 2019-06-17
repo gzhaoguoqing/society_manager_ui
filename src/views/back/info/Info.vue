@@ -29,16 +29,16 @@
       width="70%"
       :before-close="editHandleClose">
       <div>
-        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px">
-          <el-form-item label="名称">
+        <el-form ref="itemForm" :model="editItem" label-width="80px" style="margin: 30px" :rules="rules">
+          <el-form-item label="名称" prop="name">
             <el-input v-model="editItem.name" clearable></el-input>
           </el-form-item>
-          <el-form-item label="负责人" style="display: inline-block; width: 50%">
+          <el-form-item label="负责人" style="display: inline-block; width: 50%" prop="charityId">
             <el-select v-model="editItem.charityId" placeholder="请选择" style="width: 100%" clearable filterable>
               <el-option v-for="item in userList" :key="item.id" :label="`${item.name}:${item.number}`" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="介绍">
+          <el-form-item label="介绍" prop="info">
             <el-input v-model="editItem.info" type="textarea" :rows="10" clearable></el-input>
           </el-form-item>
         </el-form>
@@ -79,7 +79,18 @@ export default {
       editVisible: false,
       isEdit: false,
       editItem: cloneDeep(emptyItem),
-      selections: []
+      selections: [],
+      rules: {
+        name: [
+          { required: true, message: '名称不能为空', trigger: 'blur' }
+        ],
+        charityId: [
+          { required: true, message: '负责人不能为空', trigger: 'change' }
+        ],
+        info: [
+          { required: true, message: '介绍不能为空', trigger: 'blur' }
+        ]
+      }
     }
   },
   components: {
@@ -99,6 +110,7 @@ export default {
       })
     },
     editHandleClose () {
+      this.$refs['itemForm'].resetFields()
       this.editVisible = false
     },
     showCreateDialog () {
@@ -118,6 +130,16 @@ export default {
       this.editItem.charityId = item.charity ? item.charity.id : null
     },
     saveInfoHandle () {
+      let isLegal = true
+      this.$refs['itemForm'].validate((valid) => {
+        if (!valid) {
+          isLegal = false
+          return false
+        }
+      })
+      if (!isLegal) {
+        return
+      }
       if (this.isEdit) {
         updateInfo(cloneDeep(this.editItem)).then(response => {
           this.$notify({
